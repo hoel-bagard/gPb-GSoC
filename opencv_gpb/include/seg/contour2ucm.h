@@ -2,9 +2,9 @@
 #include <vector>
 #include <stack>
 #include <math.h>
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv/cv.hpp>
 #include "watershed.h"
 #include "ucm_mean_pb.h"
 #include "uvt.h"
@@ -50,7 +50,7 @@ public:
 namespace cv
 {
 void contour2ucm(const cv::Mat & gPb,
-                 const vector<cv::Mat> & gPb_ori,
+                 const std::vector<cv::Mat> & gPb_ori,
                  cv::Mat & ucm,
                  bool label);
 }

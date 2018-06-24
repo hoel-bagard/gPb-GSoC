@@ -115,7 +115,7 @@ assert( 0 <= diff && diff <= 255 ); \
     }
     //CV_ERROR( CV_StsUnmatchedSizes, "The input and output images must have the same size" );
 
-    size = cvGetMatSize(src);
+    size = cvGetSize(src);
 
     storage = cvCreateMemStorage();
 

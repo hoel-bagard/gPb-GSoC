@@ -14,8 +14,7 @@
 #include "affinity.h"
 #include "ic.h"
 
-
 namespace cv
 {
-void buildW(const cv::Mat & input, double** &T, int & wz, double* &D);
+void buildW(const SMatrix* Aff, double** &T, int & wz, double* &D);
 }

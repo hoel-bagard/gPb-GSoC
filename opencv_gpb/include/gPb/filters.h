@@ -1,9 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv/cv.hpp>
 
 #define X_ORI 1
 #define Y_ORI 0

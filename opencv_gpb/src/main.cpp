@@ -10,6 +10,8 @@
 //
 
 #include "globalPb.h"
+#include "affinity.h"
+#include "ic.h"
 #include "contour2ucm.h"
 
 using namespace std;
@@ -63,7 +65,32 @@ int main(int argc, char** argv) {
 
     img0 = cv::imread(argv[1], -1);
 
-    cv::globalPb(img0, gPb, gPb_thin, gPb_ori);
+
+    cv::Mat input;
+    vector<vector<cv::Mat> > gradients;
+    multiscalePb(img0, input, gradients);
+
+    int dthresh = 5;
+    float sigma = 0.1;
+
+    // copy edge info into lattice struct
+    Group::DualLattice boundaries;
+    cv::copyMakeBorder(input, boundaries.H, 1, 0, 0, 0, cv::BORDER_CONSTANT, 0.0);
+    cv::copyMakeBorder(input, boundaries.V, 0, 0, 1, 0, cv::BORDER_CONSTANT, 0.0);
+    cv::transpose(boundaries.H, boundaries.H);
+    cv::transpose(boundaries.V, boundaries.V);
+    boundaries.width = boundaries.H.rows;
+    boundaries.height = boundaries.V.cols;
+
+    Group::SupportMap ic;
+    Group::computeSupport(boundaries,dthresh,1.0f,ic);
+
+    SMatrix* Aff = NULL;
+    Group::computeAffinities2(ic,sigma,dthresh,&Aff);
+
+    cv::globalPb(img0, Aff, gPb, gPb_thin, gPb_ori);
+
+    delete Aff;
 
     // if you wanna conduct interactive segmentation later, choose DOUBLE_SIZE, otherwise SINGLE_SIZE will do either.
     cv::contour2ucm(gPb, gPb_ori, ucm, SINGLE_SIZE);
@@ -79,7 +106,7 @@ int main(int argc, char** argv) {
 
     cv::imshow("Original", img0);
     cv::imshow("gPb",  gPb);
-    cv::imshow("gPb_thin", gPb_thin);
+//    cv::imshow("gPb_thin", gPb_thin);
     cv::imshow("ucm", ucm2);
     cv::setMouseCallback("ucm", on_mouse, 0);
 

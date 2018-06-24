@@ -9,11 +9,7 @@
 #include <opencv/highgui.h>
 #include <opencv2/core/core.hpp>
 
-#ifndef __APPLE__
-#include <values.h>
-#else
 #include <float.h>
-#endif
 
 #define DOUBLE_SIZE 1
 #define SINGLE_SIZE 0
