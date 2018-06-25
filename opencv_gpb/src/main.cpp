@@ -13,6 +13,9 @@
 #include "affinity.h"
 #include "ic.h"
 #include "contour2ucm.h"
+#include <iostream>
+#include <string>
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
@@ -108,8 +111,18 @@ int main(int argc, char** argv) {
     cv::imshow("gPb",  gPb);
 //    cv::imshow("gPb_thin", gPb_thin);
     cv::imshow("ucm", ucm2);
-    cv::setMouseCallback("ucm", on_mouse, 0);
 
+    gPb.convertTo(gPb, CV_8UC3, 255.0);
+    ucm2.convertTo(ucm2, CV_8UC3, 255.0);
+    std::vector<std::string> name;
+    boost::split(name, argv[1], [](char c){return c == '.';});
+    vector<int> compression_params;
+    compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+    compression_params.push_back(100);
+    cv::imwrite(name[0] + "gPb." + name[1], gPb, compression_params);
+    cv::imwrite(name[0] + "ucm." + name[1], ucm2, compression_params);
+
+    cv::setMouseCallback("ucm", on_mouse, 0);
     while(true) {
         char ch = cv::waitKey(0);
         if(ch == 27) break;
