@@ -5,7 +5,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv/cv.hpp>
 
-#include "smatrix.h"
+#include <smatrix.h>
 
 using namespace std;
 namespace cv
