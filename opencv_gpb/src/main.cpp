@@ -16,8 +16,10 @@
 #include <iostream>
 #include <string>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace std;
+namespace bf = boost::filesystem;
 
 cv::Mat markers, ucm2, bd, ll;
 cv::Point prev_pt(-1, -1);
@@ -69,6 +71,14 @@ int main(int argc, char** argv) {
     img0 = cv::imread(argv[1], -1);
 
 
+    boost::filesystem::path path(argv[1]);
+
+    bf::path path_gpb_out = path.parent_path() /
+      bf::path(path.stem().string() + "_gpb" + path.extension().string());
+    bf::path path_ucm_out = path.parent_path() /
+      bf::path(path.stem().string() + "_ucm" + path.extension().string());
+
+
     cv::Mat input;
     vector<vector<cv::Mat> > gradients;
     multiscalePb(img0, input, gradients);
@@ -114,13 +124,11 @@ int main(int argc, char** argv) {
 
     gPb.convertTo(gPb, CV_8UC3, 255.0);
     ucm2.convertTo(ucm2, CV_8UC3, 255.0);
-    std::vector<std::string> name;
-    boost::split(name, argv[1], [](char c){return c == '.';});
     vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
     compression_params.push_back(100);
-    cv::imwrite(name[0] + "gPb." + name[1], gPb, compression_params);
-    cv::imwrite(name[0] + "ucm." + name[1], ucm2, compression_params);
+    cv::imwrite(path_gpb_out.string() , gPb, compression_params);
+    cv::imwrite(path_ucm_out.string(), ucm2, compression_params);
 
     cv::setMouseCallback("ucm", on_mouse, 0);
     while(true) {
