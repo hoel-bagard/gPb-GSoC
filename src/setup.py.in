@@ -9,5 +9,5 @@ setup(
     description='global probability boundary',
     packages=['pygpb'],
     package_dir={'pygpb': '${CMAKE_CURRENT_BINARY_DIR}/pygpb'},
-    package_data = {'pygpb': ['libpygpb.so']}
+    package_data = {'pygpb': ['libgpb.so']}
 )

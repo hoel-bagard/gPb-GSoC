@@ -1,22 +1,30 @@
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <exception>
 #include <boost/python/numpy.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python/args.hpp>
-#include <boost/python/class.hpp>
-#include <boost/python/overloads.hpp>
-#include <boost/python/return_internal_reference.hpp>
 #include "gpb.h"
+#include "np_opencv_converter.hpp"
 
-using namespace boost::python;
+namespace bp = boost::python;
+namespace bn = boost::python::numpy;
+using namespace boost;
 
-
+// namespace fs { namespace python {
 BOOST_PYTHON_MODULE(libgpb)
 {
   Py_Initialize();
-  namespace bp = boost::python;
+  // bn::initialize();
+  fs::python::init_and_export_converters();
+  bp::scope scope = bp::scope();
 
-  class_<Gpb>("gpb")
-    .def("run",&Gpb::run)
+  bp::class_<Gpb>("Gpb")
+    .def(bp::init<>())
+    .def("hello", &Gpb::hello)
+    .def("test_np_mat", &Gpb::test_np_mat)
+    .def("run", &Gpb::run)
     ;
+
 }
+
+// } // namespace fs
+// } // namespace python

@@ -36,8 +36,9 @@
 #include <iostream>
 #include <list>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/imgproc/types_c.h>
 #include "watershed.h"
-#include "VisWatershed.h"
+//#include "VisWatershed.h"
 
 namespace
 {

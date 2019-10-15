@@ -4,7 +4,7 @@
 #include <math.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv/cv.hpp>
+#include <opencv2/opencv.hpp>
 #include "watershed.h"
 #include "ucm_mean_pb.h"
 #include "uvt.h"
