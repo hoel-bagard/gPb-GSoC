@@ -37,8 +37,8 @@ bp::tuple Gpb::run(const cv::Mat &img0) {
 
   ucm.copyTo(ucm2);
 
-  // gPb.convertTo(gPb, CV_8UC3, 255.0);
-  // ucm2.convertTo(ucm2, CV_8UC3, 255.0);
+  gPb.convertTo(gPb, CV_8UC3, 255.0);
+  ucm2.convertTo(ucm2, CV_8UC3, 255.0);
 
   // cv::imwrite(path_gpb_out.string() , gPb, compression_params);
   // cv::imwrite(path_ucm_out.string(), ucm2, compression_params);

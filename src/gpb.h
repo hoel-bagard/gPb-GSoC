@@ -19,10 +19,12 @@ class Gpb{
     public:
 
         bp::tuple run(const cv::Mat& image);
-        cv::Mat test_np_mat(const cv::Mat &in) {
-            std::cerr << "in: " << in << std::endl;
-            std::cerr << "sz: " << in.size() << std::endl;
-            return in.clone();
+        bp::tuple test_np_mat(const cv::Mat &in1, const cv::Mat &in2) {
+            std::cerr << "in1: " << in1 << std::endl;
+            std::cerr << "size(in1): " << in1.size() << std::endl;
+            std::cerr << "in2: " << in2 << std::endl;
+            std::cerr << "size(in2): " << in2.size() << std::endl;
+            return bp::make_tuple(in1.clone(), in2.clone());
         }
         void hello(const int& a) {
             std::cout << "arg: " << a << std::endl;

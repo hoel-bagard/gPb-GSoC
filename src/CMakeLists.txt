@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 add_subdirectory(numpy-opencv-converter)
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 find_package(OpenCV REQUIRED)
 find_package(Arpack REQUIRED)
 find_package( Boost 1.58.0 REQUIRED COMPONENTS python3 numpy3)
