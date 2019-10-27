@@ -19,6 +19,7 @@ BOOST_PYTHON_MODULE(libgpb)
 
   bp::class_<Gpb>("Gpb")
     .def(bp::init<>())
+    .def("test_np_mat", &Gpb::test_np_mat)
     .def("run", &Gpb::run)
     .def("texton", &Gpb::texton)
     ;
