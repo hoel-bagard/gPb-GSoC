@@ -1,5 +1,6 @@
 from pygpb import libgpb
 import numpy as np
+from skimage import io, color
 import matplotlib.pyplot as plt
 from skimage import io
 import os 
@@ -20,7 +21,11 @@ if __name__ == "__main__":
 
     # run it
     gpb = libgpb.Gpb()
-    img = (plt.imread(path) * 255).astype(np.uint8)
+    img = io.imread(path)
+    if(img.strides[1] > 3):
+        img = (255 * color.rgba2rgb(img)).astype(np.uint8)
+
+    gpb.test_np_mat(img, img)
 
     # get texton
     texton = gpb.texton(img, n_ori,
