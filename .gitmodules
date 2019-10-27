@@ -1,3 +1,3 @@
 [submodule "numpy-opencv-converter"]
 	path = numpy-opencv-converter
-	url = https://github.com/lejeunel/numpy-opencv-converter.git
+	url = git@github.com:lejeunel/numpy-opencv-converter.git
