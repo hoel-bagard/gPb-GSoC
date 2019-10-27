@@ -27,7 +27,7 @@ namespace Group
 //
 // compute similarities for a subset of an image given by mask
 //
-void computeAffinities2(const SupportMap& ic, const float sigma, const float dthresh, SMatrix** affinity);
+void computeAffinities2(const SupportMap& ic, const float sigma, const float dthresh, SMatrix* affinity);
 
 } //namespace Group
 

@@ -32,15 +32,13 @@ class Gpb{
         void hello(const int& a) {
             std::cout << "arg: " << a << std::endl;
         }
-  Gpb(){}
 
   void reset(){
     gradients.clear();
     gPb_ori.clear();
     compression_params.clear();
-    Aff.reset();
-    ic.reset();
-    boundaries.reset();
+    // ic._delete();
+
   }
 
     private:

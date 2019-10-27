@@ -16,26 +16,25 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 // 02111-1307, USA, or see http://www.gnu.org/copyleft/gpl.html.
 
-
 #ifndef __smatrix_h__
 #define __smatrix_h__
 
-#include <stdio.h>
 #include "array.h"
+#include <memory>
+#include <stdio.h>
 
-class SMatrix
-{
+class SMatrix {
 public:
-    SMatrix(int n, int* nz, int** col, double** values);
-    ~SMatrix();
+  typedef std::shared_ptr<SMatrix> UPtrSMatrix;
+  SMatrix(int n, int *nz, int **col, double **values);
+  ~SMatrix();
 
-    void symmetrize();
+  void symmetrize();
 
-    int n;
-    int** col;
-    int* nz;
-    double** values;
+  int n;
+  int **col;
+  int *nz;
+  double **values;
 };
 
 #endif
-
