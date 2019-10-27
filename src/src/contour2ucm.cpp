@@ -799,17 +799,24 @@ void contour2ucm(const cv::Mat & gPb,
 {
     bool flag = label ? DOUBLE_SIZE : SINGLE_SIZE;
     cv::Mat ws_wt8, ws_wt2, labels, ws_wt;
+    std::cout << "contour2ucm/creat_finest_partition" << std::endl;
     creat_finest_partition(gPb, gPb_ori, ws_wt);
 
     rot90(ws_wt, ws_wt8, 1);
     to_8(ws_wt8, ws_wt8);
     rot90(ws_wt8, ws_wt8, -1);
     to_8(ws_wt8, ws_wt8);
+
+    std::cout << "contour2ucm/super_contour" << std::endl;
     super_contour(ws_wt8, ws_wt2);
+    std::cout << "contour2ucm/clean_watershed" << std::endl;
     clean_watersheds(ws_wt2, ws_wt2, labels);
 
+    std::cout << "contour2ucm/copyMakeBorder" << std::endl;
     cv::copyMakeBorder(ws_wt2, ws_wt2, 0, 1, 0, 1, cv::BORDER_REFLECT);
+    std::cout << "contour2ucm/ucm_mean_pb" << std::endl;
     cv::ucm_mean_pb(ws_wt2, labels, ucm, flag);
+    std::cout << "contour2ucm/pb_normalize" << std::endl;
     pb_normalize(ucm, ucm);
 }
 }

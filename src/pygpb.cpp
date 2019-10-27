@@ -22,6 +22,7 @@ BOOST_PYTHON_MODULE(libgpb)
     .def("hello", &Gpb::hello)
     .def("test_np_mat", &Gpb::test_np_mat)
     .def("run", &Gpb::run)
+    .def("texton", &Gpb::texton)
     ;
 
 }

@@ -7,6 +7,8 @@ import sys
 
 if __name__ == "__main__":
 
+    n_ori, Kmean_num, sigma_sm, sigma_lg = 8, 64, 2.0, np.sqrt(2)*2.0
+
     # get paths
     path = sys.argv[-1]
     res_path = os.path.split(path)[0]
@@ -18,20 +20,27 @@ if __name__ == "__main__":
 
     # run it
     gpb = libgpb.Gpb()
-    img = plt.imread(path)
+    img = (plt.imread(path) * 255).astype(np.uint8)
+
+    # get texton
+    texton = gpb.texton(img, n_ori,
+                        Kmean_num,
+                        sigma_sm, sigma_lg)
     gpb_res, ucm_res = gpb.run(img)
 
     # save images
     print('saving gPb to: {}'.format(gpb_path))
-    io.imsave(gpb_path, gpb_res / 255)
+    io.imsave(gpb_path, gpb_res)
     print('saving UCM to: {}'.format(ucm_path))
     io.imsave(ucm_path, ucm_res / 255)
 
     # plot
-    fig, ax = plt.subplots(1, 2)
+    fig, ax = plt.subplots(1, 3)
     ax[0].imshow(gpb_res)
     ax[0].set_title('gPb')
     ax[1].imshow(ucm_res)
     ax[1].set_title('UCM')
+    ax[2].imshow(texton)
+    ax[2].set_title('texton')
     fig.show()
 

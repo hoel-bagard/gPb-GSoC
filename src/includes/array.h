@@ -20,6 +20,7 @@
 #define ARRAY_HH
 
 #include <assert.h>
+#include <iostream>
 
 // TODO:
 // - replace asserts with exceptions?
