@@ -4,8 +4,26 @@ using namespace std;
 
 namespace cv
 {
-void buildW(const SMatrix* W, double** &T, int & wz, double* &D)
+void buildW(const cv::Mat & input, double** &T, int & wz, double* &D)
 {
+    int dthresh = 5;
+    float sigma = 0.1;
+
+    // copy edge info into lattice struct
+    Group::DualLattice boundaries;
+    cv::copyMakeBorder(input, boundaries.H, 1, 0, 0, 0, cv::BORDER_CONSTANT, 0.0);
+    cv::copyMakeBorder(input, boundaries.V, 0, 0, 1, 0, cv::BORDER_CONSTANT, 0.0);
+    cv::transpose(boundaries.H, boundaries.H);
+    cv::transpose(boundaries.V, boundaries.V);
+    boundaries.width = boundaries.H.rows;
+    boundaries.height = boundaries.V.cols;
+
+    Group::SupportMap ic;
+    Group::computeSupport(boundaries,dthresh,1.0f,ic);
+
+    SMatrix* W = NULL;
+    Group::computeAffinities2(ic,sigma,dthresh,&W);
+
     //output assignment
     wz = 0;
     for(size_t i=0; i<W->n; i++)
@@ -17,7 +35,6 @@ void buildW(const SMatrix* W, double** &T, int & wz, double* &D)
     for(size_t row = 0; row < W->n; row++) {
         //initialize diag matrix.
         //int diag_ind = 0;
-        D[row] = 0;
         for(size_t i=0; i<W->nz[row]; i++) {
             //initialize sparse matrix.
             //if(row == W->col[row][i])
@@ -34,5 +51,6 @@ void buildW(const SMatrix* W, double** &T, int & wz, double* &D)
         D[row] = sqrt(D[row]);
         ct +=  W->nz[row];
     }
+    delete W;
 }
 }

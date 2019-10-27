@@ -12,7 +12,6 @@ namespace cv
 {
 void
 globalPb(const cv::Mat & image,
-         const SMatrix* Aff,
          cv::Mat & gPb,
          cv::Mat & gPb_thin,
          vector<cv::Mat> & gPb_ori);

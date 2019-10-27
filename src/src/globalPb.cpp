@@ -48,7 +48,6 @@ _gPb_Weights(int nChannels)
         weights[11]= 0.0264;
         weights[12]= 0.0090;
     }
-    weights[0] = weights[12];
     return weights;
 }
 
@@ -453,11 +452,12 @@ multiscalePb(const cv::Mat & image,
     mPb_all.clear();
 }
 
-void gPb_gen(const cv::Mat & image,
+void gPb_gen(const cv::Mat & mPb_max,
              const double* weights,
              const vector<cv::Mat> & sPb,
              vector<vector<cv::Mat> > & gradients,
              vector<cv::Mat> & gPb_ori,
+             cv::Mat & gPb_thin,
              cv::Mat & gPb)
 {
     cout<<"gPb computation commencing ... "<<endl;
@@ -467,20 +467,19 @@ void gPb_gen(const cv::Mat & image,
 
     gPb_ori.resize(n_ori);
     for(size_t idx=0; idx<n_ori; idx++) {
-        gPb_ori[idx] = cv::Mat::zeros(image.rows, image.cols, CV_32FC1);
+        gPb_ori[idx] = cv::Mat::zeros(mPb_max.rows, mPb_max.cols, CV_32FC1);
         for(size_t ch=0; ch<gradients.size(); ch++)
             cv::addWeighted(gPb_ori[idx], 1.0, gradients[ch][idx], weights[ch], 0.0, gPb_ori[idx]);
 
         if(idx == 0)
             gPb_ori[idx].copyTo(gPb);
         else
-            for(size_t i=0; i<image.rows; i++)
-                for(size_t j=0; j<image.cols; j++)
+            for(size_t i=0; i<mPb_max.rows; i++)
+                for(size_t j=0; j<mPb_max.cols; j++)
                     if(gPb.at<float>(i,j) < gPb_ori[idx].at<float>(i,j))
                         gPb.at<float>(i,j) = gPb_ori[idx].at<float>(i,j);
     }
 
-    /*
     gPb.copyTo(gPb_thin);
     for(size_t i=0; i<mPb_max.rows; i++)
         for(size_t j=0; j<mPb_max.cols; j++)
@@ -505,11 +504,9 @@ void gPb_gen(const cv::Mat & image,
         eroded.copyTo(img_tmp);
     } while(nnz);
     cv::multiply(gPb_thin, bwskel, gPb_thin, 1.0);
-    */
 }
 
-void sPb_gen(const cv::Mat & image,
-             const SMatrix* Aff,
+void sPb_gen(cv::Mat & mPb_max,
              vector<cv::Mat> & sPb)
 {
     cout<<"sPb computation commencing ... "<<endl;
@@ -518,14 +515,14 @@ void sPb_gen(const cv::Mat & image,
     sPb.resize(n_ori);
 
     vector<cv::Mat> sPb_raw;
-    cv::buildW(Aff, W, nnz, D);
-    cv::normalise_cut(W, nnz, image.rows, image.cols, D, 17, sPb_raw);
+    cv::buildW(mPb_max, W, nnz, D);
+    cv::normalise_cut(W, nnz, mPb_max.rows, mPb_max.cols, D, 17, sPb_raw);
 
     vector<cv::Mat> oe_filters;
     cv::gaussianFilters(n_ori, 1.0, 1, HILBRT_OFF, 3.0, oe_filters);
 
     for(size_t i=0; i<n_ori; i++) {
-        sPb[i] = cv::Mat::zeros(image.rows, image.cols, CV_32FC1);
+        sPb[i] = cv::Mat::zeros(mPb_max.rows, mPb_max.cols, CV_32FC1);
         for(size_t j=0; j<sPb_raw.size(); j++) {
             cv::Mat temp_blur;
             cv::filter2D(sPb_raw[j], temp_blur, CV_32F, oe_filters[i],
@@ -543,23 +540,29 @@ void sPb_gen(const cv::Mat & image,
 
 void
 globalPb(const cv::Mat & image,
-         const SMatrix* Aff,
          cv::Mat & gPb,
          cv::Mat & gPb_thin,
          vector<cv::Mat> & gPb_ori)
 {
-    double *weights = _gPb_Weights(image.channels());
+    gPb = cv::Mat::zeros(image.rows, image.cols, CV_32FC1);
+    cv::Mat mPb_max;
+    vector<cv::Mat> sPb;
+    vector<vector<cv::Mat> > gradients;
+    double *weights;
+    weights = _gPb_Weights(image.channels());
 
     //multiscalePb - mPb
-//    cv::Mat mPb_max;
-    vector<vector<cv::Mat> > gradients;
-//    multiscalePb(image, mPb_max, gradients);
+    multiscalePb(image, mPb_max, gradients);
+    //mPb_max.copyTo(gPb);
 
     //spectralPb   - sPb
-    vector<cv::Mat> sPb;
-    sPb_gen(image, Aff, sPb);
+    sPb_gen(mPb_max, sPb);
 
     //globalPb - gPb
-    gPb_gen(image, weights, sPb, gradients, gPb_ori, gPb);
+    gPb_gen(mPb_max, weights, sPb, gradients, gPb_ori, gPb_thin, gPb);
+    //clean up
+    sPb.clear();
+    gradients.clear();
+    delete[] weights;
 }
 }

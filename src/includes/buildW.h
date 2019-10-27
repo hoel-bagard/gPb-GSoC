@@ -6,7 +6,6 @@
 #include <string.h>
 #include <fstream>
 #include <iostream>
-#include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/core/core.hpp>
 #include "array.h"
@@ -14,7 +13,8 @@
 #include "affinity.h"
 #include "ic.h"
 
+
 namespace cv
 {
-void buildW(const SMatrix* Aff, double** &T, int & wz, double* &D);
+void buildW(const cv::Mat & input, double** &T, int & wz, double* &D);
 }

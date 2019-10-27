@@ -61,7 +61,7 @@ float C_IC_SS(float ic)
 // compute similarities for the set of "true" pixels in region.
 // affinity matrix is ordered in scanline order
 //
-void computeAffinities2(const SupportMap& icmap, const float sigma, const float dthresh, SMatrix* affinities)
+void computeAffinities2(const SupportMap& icmap, const float sigma, const float dthresh, SMatrix** affinities)
 {
     int width = icmap.size(0);
     int height = icmap.size(1);
@@ -163,11 +163,10 @@ void computeAffinities2(const SupportMap& icmap, const float sigma, const float 
         }//for y
     }//for x
 
-    affinities = new SMatrix(numPixels,nz,col,vals);
-    affinities->symmetrize();
+    *affinities = new SMatrix(numPixels,nz,col,vals);
+    (*affinities)->symmetrize();
 }
 
 } //namespace Group
-
 
 

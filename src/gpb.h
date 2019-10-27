@@ -21,40 +21,10 @@ class Gpb{
         bp::tuple run(const cv::Mat& image);
         cv::Mat texton(const cv::Mat &img, int n_ori, int Kmean_num,
                       double sigma_sm, double sigma_lg);
-        bp::tuple test_np_mat(const cv::Mat &in1, const cv::Mat &in2) {
-            std::cerr << "in1: " << in1 << std::endl;
-            std::cerr << "size(in1): " << in1.size() << std::endl;
-            std::cerr << "in2: " << in2 << std::endl;
-            std::cerr << "size(in2): " << in2.size() << std::endl;
-            return bp::make_tuple(in1.clone(), in2.clone());
-        }
-
-        void hello(const int& a) {
-            std::cout << "arg: " << a << std::endl;
-        }
-
-  void reset(){
-    gradients.clear();
-    gPb_ori.clear();
-    compression_params.clear();
-    // ic._delete();
-
-  }
 
     private:
         cv::Mat markers, ucm2, bd, ll;
-        cv::Mat img0, gPb_thin;
-        cv::Mat gPb, ucm;
-        cv::Mat input;
-        vector<cv::Mat> gPb_ori;
-        cv::Point prev_pt;
-        double c;
         int dthresh = 5;
         float sigma = 0.1;
-        vector<vector<cv::Mat> > gradients;
-        Group::SupportMap ic;
-        Group::DualLattice boundaries;
-        SMatrix* Aff = NULL;
-        vector<int> compression_params;
 
 };
