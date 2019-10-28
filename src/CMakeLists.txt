@@ -17,7 +17,7 @@ file(GLOB SRC
 set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined" )
 
 include_directories(includes)
-add_executable(main main_two_imgs.cpp ${SRC} "process.h" "process.cpp")
+add_executable(main main.cpp ${SRC} "process.h" "process.cpp")
 target_link_libraries(main ${OpenCV_LIBS} arpack)
 
 if(USE_PY) 

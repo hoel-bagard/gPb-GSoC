@@ -415,9 +415,7 @@ multiscalePb(const cv::Mat & image,
     else
       for(size_t i=0; i<3; i++){
 
-          cout<<"multiscalePb copyto"<<endl;
             image.copyTo(layers[i]);
-          cout<<"ok"<<endl;
       }
 
     cout<<"mPb computation commencing ..."<<endl;
@@ -449,7 +447,6 @@ multiscalePb(const cv::Mat & image,
                     }
     }
     nonmax_oriented_2D(mPb_max, angles, temp, M_PI/8.0);
-    cout<<"temp.copyto"<<endl;
     temp.copyTo(mPb_max);
 
     //clean up
