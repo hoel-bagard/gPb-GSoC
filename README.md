@@ -32,17 +32,13 @@ cd build
 For python wrapper:
 ```
 cmake -DUSE_PY ..
+make
+python src/setup.py install
 ```
-
 Without wrapper:
 ```
 cmake ..
-```
-
-Compile:
-```
 make
-python src/setup.py install
 ```
 
 ## Getting started
