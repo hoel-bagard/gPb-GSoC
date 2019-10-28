@@ -8,10 +8,11 @@ It is a port from https://github.com/vrabaud/gPb.
 It comes with a boost/python wrapper and uses OpenCV internally.
 
 ## Prerequisites
+* [OpenCv > 4](https://opencv.org/)
 
-This software requires: 
+To compile with python wrapper you will need:
 * [Boost](http://www.boost.org/)
-* [OpenCv](https://opencv.org/)
+* [Python] (https://www.python.org/)
 
 It is tested with Boost > 1.58, OpenCV > 4, and Python > 3
 
@@ -27,12 +28,23 @@ Install the package with:
 cd gPb-GSoC
 mkdir build
 cd build
+```
+For python wrapper:
+```
+cmake -DUSE_PY ..
+```
+
+Without wrapper:
+```
 cmake ..
+```
+
+```
 make
 python src/setup.py install
 ```
 
 ## Getting started
 
-See demo.py 
+See demo.py or main
 

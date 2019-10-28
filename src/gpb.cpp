@@ -17,16 +17,7 @@ bp::tuple Gpb::run(const cv::Mat &img0) {
     cv::Mat gPb, ucm, gPb_thin;
     vector<cv::Mat> gPb_ori;
 
-    cv::globalPb(img0, gPb, gPb_thin, gPb_ori);
-
-  // if you wanna conduct interactive segmentation later, choose
-  // DOUBLE_SIZE, otherwise SINGLE_SIZE will do either.
-  cv::contour2ucm(gPb, gPb_ori, ucm, SINGLE_SIZE);
-
-  ucm.copyTo(ucm2);
-
-  gPb.convertTo(gPb, CV_8UC3, 255.0);
-  ucm2.convertTo(ucm2, CV_8UC3, 255.0);
+    process(img0, gPb, ucm);
 
   return bp::make_tuple(gPb.clone(), ucm2.clone());
 }

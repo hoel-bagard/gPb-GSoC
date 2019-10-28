@@ -1,13 +1,7 @@
-#include "globalPb.h"
-#include "affinity.h"
-#include "ic.h"
-#include "contour2ucm.h"
-#include <iostream>
-#include <string>
 #include <boost/python.hpp>
 #include <boost/python/numpy.hpp>
-#include <opencv2/core/mat.hpp>
 #include <Python.h>
+#include "process.h"
 
 
 namespace bp = boost::python;
@@ -15,7 +9,6 @@ namespace bn = boost::python::numpy;
 using namespace boost;
 
 class Gpb{
-  // static boost::shared_ptr<Gpb> create () { return boost::shared_ptr<Gpb>(new Gpb); }
     public:
 
         bp::tuple run(const cv::Mat& image);
