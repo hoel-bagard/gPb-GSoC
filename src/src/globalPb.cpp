@@ -434,9 +434,7 @@ multiscalePb(const cv::Mat & image,
         if(idx == 0) {
             angles = cv::Mat::ones(image.rows, image.cols, CV_32FC1);
             cv::multiply(angles, angles, angles, ori[idx]);
-            cout<<"mPb_all.copyto"<<endl;
             mPb_all[idx].copyTo(mPb_max);
-            cout<<"ok"<<endl;
         }
         else
             for(size_t i=0; i<image.rows; i++)
@@ -483,20 +481,15 @@ void gPb_gen(const cv::Mat & mPb_max,
                     if(gPb.at<float>(i,j) < gPb_ori[idx].at<float>(i,j))
                         gPb.at<float>(i,j) = gPb_ori[idx].at<float>(i,j);
     }
-    cout<<"gPb copyto gpb_thin "<<endl;
     gPb.copyTo(gPb_thin);
-    cout<<"ok"<<endl;
     for(size_t i=0; i<mPb_max.rows; i++)
         for(size_t j=0; j<mPb_max.cols; j++)
             if(mPb_max.at<float>(i,j)<0.05)
                 gPb_thin.at<float>(i,j) = 0.0;
 
     bwskel = cv::Mat::zeros(mPb_max.rows, mPb_max.cols, CV_32FC1);
-    cout<<"gpb_thin copy to img_tmp"<<endl;
     gPb_thin.copyTo(img_tmp);
-    cout<<"ok"<<endl;
     do {
-        cout<<"in while morpho"<<endl;
         cv::erode(img_tmp, eroded, cv::Mat(), cv::Point(-1, -1));
         cv::dilate(eroded, temp, cv::Mat(), cv::Point(-1,-1));
         cv::subtract(img_tmp, temp, temp);
@@ -510,11 +503,8 @@ void gPb_gen(const cv::Mat & mPb_max,
                 if(eroded.at<float>(i,j) != 0.0) nnz++;
             }
 
-        cout<<"eroded copy to img_tmp"<<endl;
         eroded.copyTo(img_tmp);
-        cout<<"ok"<<endl;
     } while(nnz);
-    cout<<"multiply"<<endl;
     cv::multiply(gPb_thin, bwskel, gPb_thin, 1.0);
 }
 
@@ -573,12 +563,9 @@ globalPb(const cv::Mat & image,
     //globalPb - gPb
     gPb_gen(mPb_max, weights, sPb, gradients, gPb_ori, gPb_thin, gPb);
 
-    cout<<"clean up"<<endl;
     //clean up
     sPb.clear();
     gradients.clear();
-    cout<<"delete"<<endl;
     delete[] weights;
-    cout<<"ok"<<endl;
 }
 }

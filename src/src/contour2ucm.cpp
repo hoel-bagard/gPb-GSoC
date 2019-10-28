@@ -752,40 +752,26 @@ void creat_finest_partition(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
   }
 
   // clean up
-  std::cout << "clean vertices" << endl;
   _vertices.clear();
-  std::cout << "clean edges" << endl;
   _edges.clear();
-  std::cout << "ok" << endl;
 }
 
 void contour2ucm(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
                  cv::Mat &ucm, bool label) {
   bool flag = label ? DOUBLE_SIZE : SINGLE_SIZE;
   cv::Mat ws_wt8, ws_wt2, labels, ws_wt;
-  std::cout << "creat_finest_partition" << endl;
   creat_finest_partition(gPb, gPb_ori, ws_wt);
-  std::cout << "ok" << endl;
 
-  std::cout << "rot90" << endl;
   rot90(ws_wt, ws_wt8, 1);
-  std::cout << "to_8" << endl;
   to_8(ws_wt8, ws_wt8);
-  std::cout << "rot90" << endl;
   rot90(ws_wt8, ws_wt8, -1);
-  std::cout << "to_8" << endl;
   to_8(ws_wt8, ws_wt8);
 
-  std::cout << "super contour" << endl;
   super_contour(ws_wt8, ws_wt2);
-  std::cout << "clean watersheds" << endl;
   clean_watersheds(ws_wt2, ws_wt2, labels);
 
-  std::cout << "copymakeborder" << endl;
   cv::copyMakeBorder(ws_wt2, ws_wt2, 0, 1, 0, 1, cv::BORDER_REFLECT);
-  std::cout << "ucm_mean_pb" << endl;
   cv::ucm_mean_pb(ws_wt2, labels, ucm, flag);
-  std::cout << "pb_normalize" << endl;
   pb_normalize(ucm, ucm);
 }
 } // namespace cv
