@@ -17,4 +17,5 @@
 namespace cv
 {
 void buildW(const cv::Mat & input, double** &T, int & wz, double* &D);
+
 }

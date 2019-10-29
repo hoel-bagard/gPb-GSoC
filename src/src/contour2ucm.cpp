@@ -13,9 +13,9 @@
 
 using namespace std;
 
-static uptr_contour_vertex create_contour_vertex(int x, int y) {
-  // uptr_contour_vertex v(new contour_vertex[1]);
-  uptr_contour_vertex v(new contour_vertex);
+static ptr_contour_vertex create_contour_vertex(int x, int y) {
+  // ptr_contour_vertex v(new contour_vertex[1]);
+  ptr_contour_vertex v(new contour_vertex);
   v->id = 0;
   v->is_subdivision = false;
   v->x = x;
@@ -23,10 +23,10 @@ static uptr_contour_vertex create_contour_vertex(int x, int y) {
   return v;
 }
 
-static uptr_contour_edge create_contour_edge(uptr_contour_vertex v_start,
-                                             uptr_contour_vertex v_end) {
-  // uptr_contour_edge e(new contour_edge[1]);
-  uptr_contour_edge e(new contour_edge);
+static ptr_contour_edge create_contour_edge(ptr_contour_vertex v_start,
+                                             ptr_contour_vertex v_end) {
+  // ptr_contour_edge e(new contour_edge[1]);
+  ptr_contour_edge e(new contour_edge);
   e->id = 0;
   e->contour_equiv_id = 0;
   e->is_completion = false;
@@ -58,19 +58,24 @@ double contour_edge::length() const {
 
 namespace cv {
 void pb_normalize(const cv::Mat &input, cv::Mat &output) {
-  float beta1 = -2.7487, beta2 = 11.1189, beta3 = 0.0602;
+    // Parallel execution with function object.
+// typedef cv::Point3_<uint8_t> Pixel;
   input.copyTo(output);
-  for (size_t i = 0; i < output.rows; i++)
-    for (size_t j = 0; j < output.cols; j++) {
-      float temp = output.at<float>(i, j);
-      temp = 1 / (1 + exp(beta1 + beta2 * temp));
-      temp = (temp - beta3) / (1 - beta3);
-      if (temp < 0)
-        temp = 0;
-      if (temp > 1)
-        temp = 1;
-      output.at<float>(i, j) = temp;
-    }
+    // Parallel execution using C++11 lambda.
+  output.forEach<cv::Point2f>([](cv::Point2f &p, const int * position) -> void {
+        float beta1 = -2.7487;
+        float beta2 = 11.1189;
+        float beta3 = 0.0602;
+        float temp = p.x;
+        temp = 1 / (1 + exp(beta1 + beta2 * temp));
+        temp = (temp - beta3) / (1 - beta3);
+        if (temp < 0)
+            temp = 0;
+        if (temp > 1)
+            temp = 1;
+        p.x = temp;
+    });
+
 }
 
 void neighbor_exists_2D(const int *pos, const int size_x, const int size_y,
@@ -165,6 +170,7 @@ void super_contour(const cv::Mat &input, cv::Mat &output) {
   cv::Mat H = cv::Mat::zeros(input.rows, input.cols - 1, CV_32FC1);
   cv::Mat V = cv::Mat::zeros(input.rows - 1, input.cols, CV_32FC1);
   output = cv::Mat::zeros(input.rows * 2, input.cols * 2, CV_32FC1);
+
   for (size_t i = 0; i < input.rows; i++)
     for (size_t j = 0; j < input.cols; j++) {
       if (j < input.cols - 1)
@@ -192,16 +198,11 @@ void super_contour(const cv::Mat &input, cv::Mat &output) {
 
 void clean_watersheds(const cv::Mat &input, cv::Mat &output, cv::Mat &labels) {
   input.copyTo(output);
-  cv::Mat c = cv::Mat::zeros(input.rows, input.cols, CV_32SC1);
-  for (size_t i = 0; i < output.rows; i++)
-    for (size_t j = 0; j < output.cols; j++) {
-      if (output.at<float>(i, j) == 0.0)
-        c.at<int>(i, j) = 1;
-      /*if(i==0 || i==output.rows-1)
-        c.at<int>(i,j) = 0;
-      if(j==0 || j==output.cols-1)
-      c.at<int>(i,j) = 0;*/
-    }
+
+  // build mask with 1's where output is 0
+  cv::Mat c_ = output == 0;
+  cv::Mat c;
+  c_.convertTo(c, CV_32SC1);
 
   // Morphological clean up isolated pixel.
   cv::Mat mask;
@@ -423,8 +424,8 @@ int connected_component(const cv::Mat &ws_bw, cv::Mat &labels) {
 
 void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
                   cv::Mat &_is_vertex, cv::Mat &_assignment,
-                  vector<uptr_contour_vertex> &_vertices,
-                  vector<uptr_contour_edge> &_edges) {
+                  vector<ptr_contour_vertex> &_vertices,
+                  vector<ptr_contour_edge> &_edges) {
   int num_labels = connected_component(ws_bw, labels);
   int rows = ws_bw.rows, cols = ws_bw.cols;
   int *label_x = new int[num_labels];
@@ -433,7 +434,7 @@ void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
   int *pos = new int[2];
 
   cv::Mat mask, mask_cmp;
-  vector<vector<uptr_contour_edge>> _edges_equiv;
+  vector<vector<ptr_contour_edge>> _edges_equiv;
 
   _assignment = cv::Mat::zeros(rows, cols, CV_32SC1);
   _is_vertex = cv::Mat::zeros(rows, cols, CV_32SC1);
@@ -450,7 +451,7 @@ void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
         neighbor_exists_2D(pos, rows, cols, mask);
         neighbor_compare_2D(pos, labels, mask, mask_cmp);
         if (is_vertex_2D(mask_cmp)) {
-          uptr_contour_vertex v = create_contour_vertex(i, j);
+          ptr_contour_vertex v = create_contour_vertex(i, j);
           v->id = _vertices.size();
           _assignment.at<int>(i, j) = v->id;
           _vertices.push_back(v);
@@ -465,7 +466,7 @@ void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
 
   for (size_t i = 0; i < num_labels; i++) {
     if (!has_vertex[i]) {
-      uptr_contour_vertex v = create_contour_vertex(label_x[i], label_y[i]);
+      ptr_contour_vertex v = create_contour_vertex(label_x[i], label_y[i]);
       v->id = _vertices.size();
       _assignment.at<int>(label_x[i], label_y[i]) = v->id;
       _vertices.push_back(v);
@@ -478,7 +479,7 @@ void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
   //------------- EDGE ASSIGNMENT ---------------------
 
   for (size_t v_id = 0; v_id < _vertices.size(); v_id++) {
-    uptr_contour_vertex v = _vertices[v_id];
+    ptr_contour_vertex v = _vertices[v_id];
     int label = labels.at<int>(v->x, v->y);
     int q_x[8] = {0};
     int q_y[8] = {0};
@@ -501,17 +502,17 @@ void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
       int nx = q_x[n], ny = q_y[n];
       if (_is_vertex.at<int>(nx, ny)) {
         if (_assignment.at<int>(nx, ny) > v_id) {
-          uptr_contour_vertex v_end = _vertices[_assignment.at<int>(nx, ny)];
-          uptr_contour_edge e = create_contour_edge(v, v_end);
+          ptr_contour_vertex v_end = _vertices[_assignment.at<int>(nx, ny)];
+          ptr_contour_edge e = create_contour_edge(v, v_end);
           e->id = _edges.size();
           e->contour_equiv_id = e->id;
           // create edge equivalence class
-          vector<uptr_contour_edge> e_equiv;
+          vector<ptr_contour_edge> e_equiv;
           e_equiv.push_back(e);
           // add edge
           _edges.push_back(e);
           _edges_equiv.push_back(e_equiv);
-          e_equiv.clear();
+          // e_equiv.clear();
         }
       } else if (!_is_edge.at<int>(nx, ny)) {
         // temporarily mark start vertex as inaccessible
@@ -619,7 +620,7 @@ void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
 
         // add endpoint as vertex (if needed) probably never get here
         if (endpoint_is_new_vertex) {
-          uptr_contour_vertex v_end = create_contour_vertex(nx, ny);
+          ptr_contour_vertex v_end = create_contour_vertex(nx, ny);
           v_end->id = _vertices.size();
           _assignment.at<int>(nx, ny) = v_end->id;
           _vertices.push_back(v_end);
@@ -627,8 +628,8 @@ void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
         }
 
         // create edge and set its identity
-        uptr_contour_vertex v_e = _vertices[_assignment.at<int>(nx, ny)];
-        uptr_contour_edge e = create_contour_edge(v, v_e);
+        ptr_contour_vertex v_e = _vertices[_assignment.at<int>(nx, ny)];
+        ptr_contour_edge e = create_contour_edge(v, v_e);
         e->id = e_id;
         e->contour_equiv_id = e_id;
         int n_edge_points =
@@ -639,18 +640,18 @@ void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
           e->x_coords[i] = e_x[i];
           e->y_coords[i] = e_y[i];
         }
-        vector<uptr_contour_edge> e_equiv;
+        vector<ptr_contour_edge> e_equiv;
         e_equiv.push_back(e);
         _edges.push_back(e);
         _edges_equiv.push_back(e_equiv);
-        e_equiv.clear();
+        // e_equiv.clear();
       }
     }
   }
 
   int n_vertices = _vertices.size();
   for (size_t v_id = 0, n = 0; n < n_vertices; n++) {
-    uptr_contour_vertex v;
+    ptr_contour_vertex v;
     v = _vertices.back();
     _vertices.pop_back();
     if ((v->edges_start.empty()) && (v->edges_end.empty()))
@@ -665,8 +666,8 @@ void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
 
 void fit_contour(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
                  cv::Mat &_is_vertex, cv::Mat &edges_endpoints,
-                 vector<uptr_contour_vertex> &_vertices,
-                 vector<uptr_contour_edge> &_edges) {
+                 vector<ptr_contour_vertex> &_vertices,
+                 vector<ptr_contour_edge> &_edges) {
   cv::Mat _assignment;
 
   contour_side(ws_bw, labels, _is_edge, _is_vertex, _assignment, _vertices,
@@ -684,8 +685,8 @@ void fit_contour(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
 void creat_finest_partition(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
                             cv::Mat &ws_wt) {
   cv::Mat edges_endpoints, _is_vertex, _is_edge, labels;
-  vector<uptr_contour_vertex> _vertices;
-  vector<uptr_contour_edge> _edges;
+  vector<ptr_contour_vertex> _vertices;
+  vector<ptr_contour_edge> _edges;
   double minVal, maxVal;
 
   cv::Mat temp = cv::Mat::zeros(gPb.rows, gPb.cols, CV_32FC1);
@@ -752,14 +753,16 @@ void creat_finest_partition(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
   }
 
   // clean up
-  _vertices.clear();
-  _edges.clear();
+  // _vertices.clear();
+  // _edges.clear();
 }
 
 void contour2ucm(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
                  cv::Mat &ucm, bool label) {
+  cout<<"contour2ucm computation commencing ... "<<endl;
   bool flag = label ? DOUBLE_SIZE : SINGLE_SIZE;
   cv::Mat ws_wt8, ws_wt2, labels, ws_wt;
+  cout<<"creat_finest_partition "<<endl;
   creat_finest_partition(gPb, gPb_ori, ws_wt);
 
   rot90(ws_wt, ws_wt8, 1);
@@ -767,11 +770,17 @@ void contour2ucm(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
   rot90(ws_wt8, ws_wt8, -1);
   to_8(ws_wt8, ws_wt8);
 
+  cout<<"super_contour "<<endl;
   super_contour(ws_wt8, ws_wt2);
+  cout<<"clean_watersheds "<<endl;
   clean_watersheds(ws_wt2, ws_wt2, labels);
 
+  cout<<"copyMakeBorder "<<endl;
   cv::copyMakeBorder(ws_wt2, ws_wt2, 0, 1, 0, 1, cv::BORDER_REFLECT);
+  cout<<"ucm_mean_pb "<<endl;
   cv::ucm_mean_pb(ws_wt2, labels, ucm, flag);
+  cout<<"pb_normalize "<<endl;
   pb_normalize(ucm, ucm);
+  cout<<"ok pb_normalize"<<endl;
 }
 } // namespace cv

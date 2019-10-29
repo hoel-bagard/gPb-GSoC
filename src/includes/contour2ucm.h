@@ -12,8 +12,8 @@
 class contour_vertex;
 class contour_edge;
 
-typedef std::shared_ptr<contour_vertex> uptr_contour_vertex;
-typedef std::shared_ptr<contour_edge> uptr_contour_edge;
+typedef std::shared_ptr<contour_vertex> ptr_contour_vertex;
+typedef std::shared_ptr<contour_edge> ptr_contour_edge;
 
 class contour_vertex {
 public:
@@ -21,8 +21,8 @@ public:
     bool is_subdivision;
     int x;
     int y;
-    std::vector<uptr_contour_edge> edges_start;
-    std::vector<uptr_contour_edge> edges_end;
+    std::vector<ptr_contour_edge> edges_start;
+    std::vector<ptr_contour_edge> edges_end;
 
     //------- vertex method ---------
 
@@ -36,8 +36,8 @@ public:
     bool is_completion;
     std::vector<int> x_coords;
     std::vector<int> y_coords;
-    uptr_contour_vertex vertex_start;
-    uptr_contour_vertex vertex_end;
+    ptr_contour_vertex vertex_start;
+    ptr_contour_vertex vertex_end;
     int vertex_start_enum;
     int vertex_end_enum;
 

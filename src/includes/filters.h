@@ -6,6 +6,9 @@
 #include <opencv2/imgproc/types_c.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
+#include <algorithm>
+#include <execution>
+
 
 #define X_ORI 1
 #define Y_ORI 0

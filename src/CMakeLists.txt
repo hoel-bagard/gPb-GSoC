@@ -6,7 +6,7 @@ find_package( Boost 1.58.0 REQUIRED COMPONENTS python3 numpy3)
 
 set(Python_ADDITIONAL_VERSIONS 3.4)
 find_package(PythonLibs 3 REQUIRED)
-
+find_package(TBB  REQUIRED)
 link_directories("${ARPACK_PATH}")
 
 file(GLOB SRC
@@ -18,11 +18,15 @@ set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined"
 
 include_directories(includes)
 add_executable(main main.cpp ${SRC} "process.h" "process.cpp")
-target_link_libraries(main ${OpenCV_LIBS} arpack)
+target_link_libraries(main ${OpenCV_LIBS} arpack tbb)
+set_property(TARGET main PROPERTY CXX_STANDARD 17)
+set_property(TARGET main PROPERTY CXX_STANDARD_REQUIRED ON)
 
 if(USE_PY) 
 
   add_library(gpb SHARED gpb.h ${SRC} "gpb.cpp" "gpb.h" "process.h" "process.cpp" pygpb.cpp)
+  set_property(TARGET gpb PROPERTY CXX_STANDARD 17)
+  set_property(TARGET gpb PROPERTY CXX_STANDARD_REQUIRED ON)
   include_directories("${Boost_INCLUDE_DIRS}" ${PYTHON_INCLUDE_DIRS})
   include_directories("${numpy-opencv-converter_SOURCE_DIR}")
   include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
@@ -30,7 +34,7 @@ if(USE_PY)
   SET(Boost_USE_MULTITHREADED ON)
   SET(Boost_USE_STATIC_RUNTIME ON)
 
-  TARGET_LINK_LIBRARIES(gpb LINK_PUBLIC np_opencv_converter ${OpenCV_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES} arpack )
+  TARGET_LINK_LIBRARIES(gpb LINK_PUBLIC np_opencv_converter ${OpenCV_LIBS} ${PYTHON_LIBRARIES} ${Boost_LIBRARIES} arpack  tbb)
 
 
   find_program(PYTHON "python3")

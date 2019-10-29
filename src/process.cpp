@@ -12,9 +12,12 @@ void process(const cv::Mat &im, cv::Mat &gPb, cv::Mat &ucm2) {
   // DOUBLE_SIZE, otherwise SINGLE_SIZE will do either.
   cv::contour2ucm(gPb, gPb_ori, ucm, SINGLE_SIZE);
 
+  cout<<"copyto ucm"<<endl;
   ucm.copyTo(ucm2);
 
+  cout<<"converts"<<endl;
   gPb.convertTo(gPb, CV_8UC3, 255.0);
   ucm2.convertTo(ucm2, CV_8UC3, 255.0);
+  cout<<"done"<<endl;
 
 }

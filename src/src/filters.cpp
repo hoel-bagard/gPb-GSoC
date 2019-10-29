@@ -553,7 +553,7 @@ public:
         label_exp.convertTo(label_exp_, CV_32S);
     }
 
-    cv::Mat_<float> operator() (const size_t &idx) {
+    cv::Mat_<float> operator() (size_t &idx) {
         cv::Mat_<float> hist_left = cv::Mat_<float>::zeros(label_size_.height*label_size_.width, num_bins_);
         cv::Mat_<float> hist_right = cv::Mat_<float>::zeros(hist_left.size());
 
@@ -658,9 +658,38 @@ gradient_hist_2D(const cv::Mat & label,
                  cv::Mat & gaussian_kernel,
                  vector<cv::Mat> & gradients)
 {
-    ParallelInvokerUnit parallel_invoker_unit(num_bins, n_ori, r, label, gaussian_kernel);
     gradients.resize(n_ori);
-    for(size_t idx = 0; idx < n_ori; idx++)
-        gradients[idx] = parallel_invoker_unit(idx);
+    // for(size_t idx = 0; idx < n_ori; idx++)
+    //     gradients[idx] = parallel_invoker_unit(idx);
+
+    struct CompUnit{
+      cv::Mat gradient;
+      size_t idx;
+    };
+    vector<CompUnit> comp_units;
+
+    for (size_t i = 0; i < gradients.size(); i++){
+      comp_units.push_back(CompUnit());
+      comp_units[i].gradient = gradients[i];
+      comp_units[i].idx = i;
+      // cout << "comp_units, i " << i << endl;
+    }
+
+    std::for_each(
+        std::execution::par, 
+        std::begin(comp_units), 
+        std::end(comp_units), 
+        [num_bins, n_ori, r, label, gaussian_kernel](CompUnit& comp_unit) {  
+          ParallelInvokerUnit parallel_invoker_unit(num_bins, n_ori, r, label, gaussian_kernel);
+            // modifies value in place
+          comp_unit.gradient = parallel_invoker_unit(comp_unit.idx);
+        });
+
+    for (size_t i = 0; i < comp_units.size(); i++){
+      gradients[i] = comp_units[i].gradient;
+    }
+    // cout << "done for_each" << endl;
+
+
 }
 }

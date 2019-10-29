@@ -158,9 +158,12 @@ pb_parts_final_selected(vector<cv::Mat> & layers,
     gradients.resize(layers.size()*3);
     //parallel_for_gradients(layers, filters, gradients, n_ori, bins, radii);
 
-    for(size_t i=0; i<gradients.size(); i++)
+    for(size_t i=0; i<gradients.size(); i++){
+      // cout << "gradient " << i+1 << "/" << gradients.size() << endl;
         cv::gradient_hist_2D(layers[i/3], radii[i-((i/3)*3-int(i>2))], n_ori,
                              bins[i/9], filters[i/3-int(i>5)], gradients[i]);
+    }
+    // cout << "done" << endl;
 }
 
 void
