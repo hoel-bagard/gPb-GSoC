@@ -558,7 +558,7 @@ globalPb(const cv::Mat & image,
 
     //multiscalePb - mPb
     multiscalePb(image, mPb_max, gradients);
-    //mPb_max.copyTo(gPb);
+    // mPb_max.copyTo(gPb);
 
     //spectralPb   - sPb
     sPb_gen(mPb_max, sPb);

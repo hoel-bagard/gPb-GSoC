@@ -688,7 +688,6 @@ gradient_hist_2D(const cv::Mat & label,
     for (size_t i = 0; i < comp_units.size(); i++){
       gradients[i] = comp_units[i].gradient;
     }
-    // cout << "done for_each" << endl;
 
 
 }
