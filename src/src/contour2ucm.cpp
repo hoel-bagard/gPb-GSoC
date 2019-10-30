@@ -59,11 +59,12 @@ double contour_edge::length() const {
 }
 
 namespace cv {
+
 struct OperatorNormalize {
     float beta1 = -2.7487;
     float beta2 = 11.1189;
     float beta3 = 0.0602;
-    void operator ()(uchar &p, const int * position) const 
+    void operator ()(float &p, const int * position) const 
     {           
       float temp = (float)p;
         temp = 1 / (1 + exp(beta1 + beta2 * temp));
@@ -77,7 +78,7 @@ struct OperatorNormalize {
 };
 void pb_normalize(const cv::Mat &input, cv::Mat &output) {
     input.copyTo(output);
-    output.forEach<uchar>(OperatorNormalize());
+    output.forEach<float>(OperatorNormalize());
 
 }
 
@@ -667,22 +668,28 @@ void contour_side(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
   }
 }
 
-void fit_contour(const cv::Mat &ws_bw, cv::Mat &labels, cv::Mat &_is_edge,
-                 cv::Mat &_is_vertex, cv::Mat &edges_endpoints,
+void fit_contour(const cv::Mat &ws_bw,
+                 cv::Mat &labels,
+                 cv::Mat &_is_edge,
+                 cv::Mat &_is_vertex,
+                 cv::Mat &edges_endpoints,
                  vector<ptr_contour_vertex> &_vertices,
                  vector<ptr_contour_edge> &_edges) {
   cv::Mat _assignment;
 
+  // cout<<"contour_side"<<endl;
   contour_side(ws_bw, labels, _is_edge, _is_vertex, _assignment, _vertices,
                _edges);
 
   int n_edges = _edges.size();
   edges_endpoints = cv::Mat::zeros(n_edges, 2, CV_32SC1);
 
+  // cout<<"for loop"<<endl;
   for (size_t i = 0; i < n_edges; i++) {
     edges_endpoints.at<int>(i, 1) = _edges[i]->vertex_start->id;
     edges_endpoints.at<int>(i, 2) = _edges[i]->vertex_end->id;
   }
+  // cout<<"ok for loop"<<endl;
 }
 
 void creat_finest_partition(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
@@ -699,7 +706,7 @@ void creat_finest_partition(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
   cv::addWeighted(gPb, 1.0, ws_bw, -minVal, 0.0, temp);
   cv::multiply(temp, ws_bw, temp, 255.0 / (maxVal - minVal));
   temp.convertTo(temp, CV_64FC1);
-  cout<<"watershed full"<<endl;
+  // cout<<"watershed full"<<endl;
   cv::watershedFull(temp, 1, ws_wt);
 
   for (size_t i = 0; i < ws_wt.rows; i++)
@@ -707,11 +714,13 @@ void creat_finest_partition(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
       if (ws_wt.at<int>(i, j) > 0)
         ws_bw.at<int>(i, j) = 0;
 
-  cout<<"fit_contour"<<endl;
+  // cout << "fit_contour" << endl;
   fit_contour(ws_bw, labels, _is_edge, _is_vertex, edges_endpoints, _vertices,
               _edges);
+  // cout << "here" << endl;
   ws_wt = cv::Mat::zeros(gPb.rows, gPb.cols, CV_32FC1);
 
+  // cout<<"edge iterate"<<endl;
   int n_edges = _edges.size();
   for (size_t i = 0; i < n_edges; i++) {
     cv::Point v1, v2;
@@ -719,7 +728,7 @@ void creat_finest_partition(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
     int orient;
     v1.x = _vertices[edges_endpoints.at<int>(i, 1)]->x;
     v1.y = _vertices[edges_endpoints.at<int>(i, 1)]->y;
-      
+
     v2.x = _vertices[edges_endpoints.at<int>(i, 2)]->x;
     v2.y = _vertices[edges_endpoints.at<int>(i, 2)]->y;
 
@@ -756,10 +765,11 @@ void creat_finest_partition(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
     ws_wt.at<float>(v2.x, v2.y) =
         max(gPb_ori[orient].at<float>(v2.x, v2.y), ws_wt.at<float>(v2.x, v2.y));
   }
+  // cout<<"ok"<<endl;
 
   // clean up
-  _vertices.clear();
-  _edges.clear();
+  // _vertices.clear();
+  // _edges.clear();
 }
 
 void contour2ucm(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
@@ -767,48 +777,28 @@ void contour2ucm(const cv::Mat &gPb, const vector<cv::Mat> &gPb_ori,
   cout<<"contour2ucm computation commencing ... "<<endl;
   bool flag = label ? DOUBLE_SIZE : SINGLE_SIZE;
   cv::Mat ws_wt8, ws_wt2, labels, ws_wt;
-  cout<<"creat_finest_partition "<<endl;
+  // cout<<"creat_finest_partition "<<endl;
   creat_finest_partition(gPb, gPb_ori, ws_wt);
-  cout<<"ok"<<endl;
+  // cout<<"ok"<<endl;
 
-  cout<<"rots"<<endl;
+  // cout<<"rots"<<endl;
   rot90(ws_wt, ws_wt8, 1);
   to_8(ws_wt8, ws_wt8);
   rot90(ws_wt8, ws_wt8, -1);
   to_8(ws_wt8, ws_wt8);
-  cout<<"ok"<<endl;
+  // cout<<"ok"<<endl;
 
-  cout<<"super_contour " << endl;
-  cv::namedWindow( "ws_wt8", WINDOW_AUTOSIZE);
-  cv::imshow( "ws_wt8", ws_wt8);
-  while((cv::waitKey() & 0xEFFFFF) != 27);
+  // cout<<"super_contour " << endl;
   super_contour(ws_wt8, ws_wt2);
 
-  cv::namedWindow( "ws_wt2", WINDOW_AUTOSIZE);
-  cv::imshow( "ws_wt2", ws_wt2);
-  while((cv::waitKey() & 0xEFFFFF) != 27);
-
-  cout<<"clean_watersheds "<<endl;
+  // cout<<"clean_watersheds "<<endl;
   clean_watersheds(ws_wt2, ws_wt2, labels);
-  cv::namedWindow( "ws_wt2 clean", WINDOW_AUTOSIZE);
-  cv::imshow( "ws_wt2 clean", ws_wt2);
-  while((cv::waitKey() & 0xEFFFFF) != 27);
 
-  cout<<"copyMakeBorder "<<endl;
+  // cout<<"copyMakeBorder "<<endl;
   cv::copyMakeBorder(ws_wt2, ws_wt2, 0, 1, 0, 1, cv::BORDER_REFLECT);
-  cv::namedWindow( "ws_wt2 copyMakeBorder", WINDOW_AUTOSIZE);
-  cv::imshow( "ws_wt2 copyMakeBorder", ws_wt2);
-  while((cv::waitKey() & 0xEFFFFF) != 27);
-  cout<<"ucm_mean_pb "<<endl;
+  // cout<<"ucm_mean_pb "<<endl;
   cv::ucm_mean_pb(ws_wt2, labels, ucm, flag);
-
-  cv::namedWindow( "ucm", WINDOW_AUTOSIZE);
-  cv::imshow( "ucm", ucm);
-  while((cv::waitKey() & 0xEFFFFF) != 27);
   
   pb_normalize(ucm, ucm);
-  cv::namedWindow( "ucm normalized", WINDOW_AUTOSIZE);
-  cv::imshow( "ucm normalized", ucm);
-  while((cv::waitKey() & 0xEFFFFF) != 27);
 }
 } // namespace cv

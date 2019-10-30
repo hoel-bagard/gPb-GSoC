@@ -1,3 +1,6 @@
+# Warning
+This code is borderline functional due to the underlying UCM/Normalised cut implementation of [https://github.com/HiDiYANG/gPb-GSoC]. In particular, seg-faults occur predominantly when input images are large >400x400. Feel free to suggest bug fixes/PRs.
+
 # gPB-UCM
 This method generates Ultra Metric Contour hierarchical segmentation of images as in
 ```

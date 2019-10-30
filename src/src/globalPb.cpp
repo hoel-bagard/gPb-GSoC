@@ -520,8 +520,11 @@ void sPb_gen(cv::Mat & mPb_max,
     sPb.resize(n_ori);
 
     vector<cv::Mat> sPb_raw;
+    cout<<"building W ... "<<endl;
     cv::buildW(mPb_max, W, nnz, D);
+    cout<<"computing normalized cut ... "<<endl;
     cv::normalise_cut(W, nnz, mPb_max.rows, mPb_max.cols, D, 17, sPb_raw);
+    // cout<<"done normalized cut"<<endl;
 
     vector<cv::Mat> oe_filters;
     cv::gaussianFilters(n_ori, 1.0, 1, HILBRT_OFF, 3.0, oe_filters);

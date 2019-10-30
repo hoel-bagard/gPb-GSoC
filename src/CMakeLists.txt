@@ -14,7 +14,7 @@ file(GLOB SRC
   src/*.cpp
 )
 
-set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined" )
+set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wall -g" )
 
 include_directories(includes)
 add_executable(main main.cpp ${SRC} "process.h" "process.cpp")
