@@ -1,3 +1,8 @@
+On arch at least, [arpack](https://archlinux.org/packages/community/x86_64/arpack/) needs to be installed.\
+To run the demo,`scikit-image` and `matplotlib` are required.\ 
+
+I made a change to the CMA because [TBB](https://github.com/ceres-solver/ceres-solver/issues/669) changed.
+
 # Warning
 This code is borderline functional due to the underlying UCM/Normalised cut implementation of [https://github.com/HiDiYANG/gPb-GSoC]. In particular, seg-faults occur predominantly when input images are large >400x400. Feel free to suggest bug fixes/PRs.
 
